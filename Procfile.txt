@@ -1,0 +1,1 @@
+web: gunicorn xscore.wsgi --log-file -
