@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Papers | GIT Portal</title>
+{% endblock %}
+
+{% block upper %}Paper{% endblock %}
+
+{% block dipper %}
+
+{% if user.is_superuser %}
+<h3 class="card-header">Admin Dashboard</h3>
+<div class="card-body">
+    <p class="card-text">Enter Admin Dashboard to host Exams</p>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-dark btn-lg">Admin Dashboard</a>
+</div>
+
+
+{% else %}
+<h3 class="card-header">Exam Paper</h3>
+<div class="card-body">
+    <p class="card-text">Select the Paper's part</p>
+    <a href="{% url 'mcq' %}" class="btn btn-outline-dark btn-lg">MCQ</a>
+    <b>|</b> <a href="{% url 'essay' %}" class="btn btn-outline-dark btn-lg">Essay</a>
+</div>
+{% endif %}
+
+{% endblock %}

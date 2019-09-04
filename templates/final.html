@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>GIT| Report</title>
+{% endblock %}
+
+{% block content %}
+<center><h5>Logged in as {{ user }}</h5>
+    <h1 style="color:#ff0000">>>> You Scored {{ percent }}% <<<</h1>
+    <h3>Score :- {{ marks }}/{{ total }}</h3>
+    <a href="{% url 'mcq' %}">Retry</a>
+</center>
+{% endblock %}

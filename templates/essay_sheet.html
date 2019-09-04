@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Papers | Essay</title>
+{% endblock %}
+
+{% block upper %}Essay {% if exam %} of {{ exam }} {% endif %}{% endblock %}
+
+{% block dipper %}
+<h3 class="card-header">Essay Questions</h3>
+<div class="card-body">
+
+    <div class="card-title">
+        <h4>
+        Download, Edit and Submit the file.
+        </h4>
+    </div>
+
+    <button name="status" hidden>Started</button>
+
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        <ul class="list-group list-group-flush">
+            {% for essay in Esys %}
+            <li class="list-group-item">
+                <div class="card border-dark">
+                    <h5 class="card-header">{{ essay.question }}</h5>
+                    <a class="btn btn-primary" href="{% url 'download_essay' essay.id %}">Download File</a>
+                    <span class="btn list-group-item-success">
+                        <span class="badge badge-success">Answer File</span>
+                        <input type="hidden" value="{{ essay.id }}">
+                        <input type="file" id="essayanswerfor{{ essay.id }}" aria-describedby="essayansweraddon{{ essay.id }}">
+                    </span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <button class="btn btn-success btn-lg btn-block"
+            value="Submitted MCQ Answers"
+            type="submit">Submit Answers
+        </button>
+    </form>
+</div>
+
+<h1 id="time" content="{% url 'dashboard' %}">
+    <span id="time_span" class="btn btn-dark" style="position:fixed;left:0;bottom:0;">Time Left
+        <span id="time_hours" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Hours</span>
+        <span class="badge badge-dark"><b>:</b></span>
+        <span id="time_minutes" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Minutes</span>
+        <span class="badge badge-dark"><b>:</b></span>
+        <span id="time_seconds" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Seconds</span>
+    </span>
+</h1>
+{% endblock %}
+{% block js_script %}
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="{% static 'countdown.js' %}"></script>
+{% endblock %}

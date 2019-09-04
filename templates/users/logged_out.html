@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Logged Out</title>
+{% endblock %}
+
+{% block upper %}Logged Out{% endblock %}
+
+{% block dipper %}
+  <h2> Success fully Logged Out! <a href="{% url 'login' %}">Click here to login..</a> </h2>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Admin Dashboard</title>
+{% endblock %}
+
+{% block upper %}Admin Dashboard{% endblock %}
+
+
+{% block dipper %}
+<h3 class="card-header">Create Exam</h3>
+<div class="card-body">
+    <div class="card-title">
+        <h4> Fill the details & Save</h4>
+    </div>
+
+    <form method="post">
+
+        {% csrf_token %}
+        {% for field in form %}
+
+            {% for error in field.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>{{ error }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+            {% endfor %}
+            <hr/>
+            <div class="form-row">
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+
+        <input id="duration" class="custom-range" type="range" min="1" max="360" step="1" value="1" oninput="show_value(this.value);"/>
+        <h1><span class="btn btn-dark">
+            <span id="hours" class="btn badge-light">0</span>
+            <span class="badge badge-pill badge-secondary">Hours</span>
+            <span class="badge badge-dark"><b>:</b></span>
+            <span id="minutes" class="btn badge-light">1</span>
+            <span class="badge badge-pill badge-secondary">Minutes</span>
+        </span></h1><hr/>
+        <button class="btn btn-success btn-lg"
+                id="btn_start"
+                name="status"
+                type="submit">Save
+        </button>
+    </form>
+
+</div>
+{% endblock %}
+
+
+{% block js_script %}
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="{% static 'dbrd_form.js' %}"></script>
+{% endblock %}

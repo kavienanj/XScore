@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Home | XScore Portal</title>
+{% endblock %}
+
+{% block upper %}
+Welcome to <span class="badge btn-dark" style="color:#51baee;">XScore</span> Portal
+{% endblock %}
+
+{% block dipper %}
+<h3 class="card-header">The Exam</h3>
+<div class="card-body">
+    <p class="card-text">Login to Enter the Exam Portal</p>
+    <a href="{% url 'home' %}" class="btn btn-outline-dark btn-lg">Enter</a>
+</div>
+{% endblock %}
