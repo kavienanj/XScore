@@ -22,7 +22,10 @@
     <div class="jumbotron" style="padding-top:3rem;padding-bottom:3rem;">
         <center>
             <h1 class="display-3">{% block upper %}{% endblock %}</h1>
-            <h3>Logged in as <span class="badge badge-secondary">{{ user }}</span></h3>
+            {% if user.is_authenticated %}
+            <h3>Logged in as <span class="badge badge-secondary">{{ user }}</span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm" style="font-size:12px;">Logout</a></h3>
+            {% endif %}
         </center>
     </div>
 

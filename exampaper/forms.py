@@ -1,4 +1,4 @@
-from .models import Exam, EssayAnswer
+from .models import Exam
 from django import forms
 
 

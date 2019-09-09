@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Accounts | Signup</title>
+{% endblock %}
+
+{% block upper %}Create New Account{% endblock %}
+
+
+{% block dipper %}
+<h3 class="card-header">Fill these requirements!</h3>
+<div class="card-body">
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>{{ error|escape }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+            {% endfor %}
+        <hr/>
+            <div class="form-row">
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+        <hr/>
+        <button class="btn btn-success btn-lg"
+                id="btn_start"
+                name="status"
+                type="submit">Save
+        </button>
+    </form>
+
+</div>
+{% endblock %}
