@@ -16,17 +16,24 @@
 <body>
 <main role="main">
     <nav class="navbar navbar-dark bg-dark">
-        <img height="75px" width="229px" src="{% static 'navbar.ico' %}" class="rounded-pill border border-secondary">
+        <a href="{% url 'welcome' %}" class="navbar-brand"><img height="75px" width="229px" src="{% static 'navbar.ico' %}" class="rounded-pill border border-secondary"></a>
+        <ul class="navbar-nav flex-row">
+            {% if user.is_authenticated %}
+            <li class="nav item"><span class="btn badge-info m-1">
+                <img src="{% static 'userlogo.png' %}" height="15px" width="15px">
+            <span class="badge badge-light">{{ user }}</span></span></li>
+            <li class="nav item"><a href="{% url 'logout' %}" class="btn btn-outline-info m-1">Log Out</a></li>
+            {% else %}
+            <li class="nav item"><a href="{% url 'login' %}" class="btn btn-info m-1">Log In
+                <img src="{% static 'userlogo.png' %}" height="15px" width="15px"></a></li>
+            <li class="nav item"><a href="{% url 'signup' %}" class="btn btn-outline-info m-1">Sign Up</a></li>
+            {% endif %}
+        </ul>
     </nav>
 
     <div class="jumbotron" style="padding-top:3rem;padding-bottom:3rem;">
         <center>
-            <h1 class="display-3">{% block upper %}{% endblock %}</h1>
-            {% if user.is_authenticated %}
-            <h3>Logged in as <span class="badge badge-secondary">{{ user }}</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm" style="font-size:12px;">Logout</a></h3>
-            {% endif %}
-        </center>
+            <h1 class="display-3">{% block upper %}{% endblock %}</h1></center>
     </div>
 
 

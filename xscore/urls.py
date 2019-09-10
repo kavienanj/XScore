@@ -8,7 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('paper/', include('exampaper.urls')),
     path('accounts/', include('user.urls')),
-    path('', lambda request: render(request, 'index.html')),
+    path('', lambda request: render(request, 'index.html'), name='welcome'),
 ]
 
 if settings.DEBUG:
