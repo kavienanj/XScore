@@ -1,4 +1,5 @@
 from django import forms
+import requests
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -15,25 +16,15 @@ class SignUpForm(UserCreationForm):
             'password1',
             'password2',
         ]
-        widgets = {
-            'username': forms.TextInput(attrs={
-                'class': 'form-control',
-                'required': 'True',
-            }),
-            'first_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'required': 'True',
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'required': 'True',
-            }),
-            'email': forms.TextInput(attrs={
-                'type': 'email',
-                'class': 'form-control',
-                'required': 'True',
-            }),
-        }
+        widgets = {field: forms.TextInput(attrs={
+            'class': 'form-control',
+            'required': 'True',
+        }) for field in fields}
+        widgets['email'] = forms.TextInput(attrs={
+            'type': 'email',
+            'class': 'form-control',
+            'required': 'True',
+        })
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
@@ -44,6 +35,9 @@ class SignUpForm(UserCreationForm):
         email = self.cleaned_data['email']
         if User.objects.filter(email=email).count():
             raise forms.ValidationError("User with email already exists")
+        page = requests.get(f'https://api.trumail.io/v2/lookups/json?email={email}')
+        if not page.json()['deliverable']:
+            raise forms.ValidationError("Invalid Email, Doesn't exist!")
         return email
 
 

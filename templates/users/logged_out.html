@@ -8,5 +8,15 @@
 {% block upper %}Logged Out{% endblock %}
 
 {% block dipper %}
-  <h2> Success fully Logged Out! <a href="{% url 'login' %}">Click here to login..</a> </h2>
+<div class="card-body">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Logout Successful! Come back again to explore more</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <p><strong>XScore</strong> is a developing web portal for hosting exams, quizzes, skill developing and testing.</p>
+    <p>Explore more about <strong>XScore</strong> and <strong>Scorers</strong> by logging in with your account!</p>
+    <a href="{% url 'welcome' %}">Go back to home</a>
+    <b style="margin:auto;">or</b>
+    <a href="{% url 'login' %}">Login Again</a>
+</div>
 {% endblock %}
