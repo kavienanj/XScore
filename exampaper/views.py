@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound
 from .models import Exam,  McqQuestions, EssayQuestion, McqAnswer, ExamPaper
 from .forms import ExamUpdateForm
-from datetime import datetime, timedelta
+from datetime import timedelta
 import threading
 from .timedexam import TimedExam
 from django.contrib.auth.decorators import login_required
@@ -35,15 +35,8 @@ def create_paper(request, id=None):
 
 @login_required
 def admin_dashboard(request):
-    if request.is_ajax():
-        data = {
-            'now': datetime.now().time().strftime("%b %d, %Y %H:%M:%S"),
-            'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S"),
-        }
-        return JsonResponse(data)
-
     if request.user.is_superuser:
-        if request.method == 'POST':
+        if request.method == 'POST' and not EXAM.status:
             exam = Exam.objects.get(id=int(request.POST['exam'][0]))
             exam.duration = timedelta(seconds=int(request.POST['duration'][0])*60)
             exam.save()
@@ -56,6 +49,7 @@ def admin_dashboard(request):
             'exam': EXAM.exam if EXAM.exam else False,
             'starts': EXAM.cleaned_start(),
             'ends': EXAM.cleaned_over(),
+            'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None,
         })
     else:
         return redirect('home')
