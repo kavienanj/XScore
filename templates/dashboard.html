@@ -20,7 +20,7 @@
         <div class="card-title">
             <h4>Select the Exam,</h4>
         </div>
-        <div class="card border-dark">
+        <div class="card border-dark shadow-sm">
             <ul class="list-group list-group-flush">
                 {% for a_exam in exam_set %}
                 <li class="list-group-item" style="padding:2px">
@@ -39,7 +39,7 @@
             <h4>Set Time Duration</h4>
         </div>
         <input id="duration" name="duration" class="custom-range" type="range" min="1" max="360" step="1" value="1" oninput="show_value(this.value);"/>
-        <h1><span class="btn btn-dark">
+        <h1><span class="btn btn-dark shadow-lg">
             <span id="hours" class="btn badge-light">0</span>
             <span class="badge badge-pill badge-secondary">Hours</span>
             <span class="badge badge-dark"><b>:</b></span>
@@ -47,7 +47,7 @@
             <span class="badge badge-pill badge-secondary">Minutes</span>
         </span></h1>
         <hr/>
-        <button class="btn btn-success btn-lg"
+        <button class="btn btn-success btn-lg shadow-sm"
                 id="btn_start"
                 type="submit">Start
         </button>
@@ -72,7 +72,7 @@
 
     <h1 id="time" content="{% url 'dashboard' %}">
         <span id="end_time_hidden" hidden>{{ over }}</span>
-        <span id="time_span" class="btn btn-dark">
+        <span id="time_span" class="btn btn-dark shadow-sm">
             <span id="time_hours" class="btn badge-light"></span>
             <span class="badge badge-pill badge-secondary">Hours</span>
             <span class="badge badge-dark"><b>:</b></span>

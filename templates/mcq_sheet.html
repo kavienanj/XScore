@@ -26,16 +26,16 @@
             {% for mcq in MCQs %}
             <li class="list-group-item">
 
-                <div class="card border-dark">
+                <div class="card border-dark shadow-lg">
                 <h5 class="card-header">{{ mcq.question }}</h5>
                 <ul class="list-group list-group-flush">
 
-                    {% for option in mcq.option_list %}
+                    {% for opt in mcq.mcqoption_set.all %}
                     <li class="list-group-item" style="padding:2px">
                         <label name="label{{ mcq.id }}" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
                             <input type="radio" class="btn-lg" name="{{ mcq.id }}" value="{{ option }}"
                                    onchange="swap_class(this);">
-                            <span style="margin:auto;">{{ option }}</span>
+                            <span style="margin:auto;">{{ opt.option }}</span>
                         </label>
                     </li>
                     {% endfor %}
@@ -58,7 +58,7 @@
 
 <h1 id="time" content="{% url 'dashboard' %}">
     <span id="end_time_hidden" hidden>{{ over }}</span>
-    <span id="time_span" class="btn btn-dark" style="position:fixed;left:0;bottom:0;">Time Left
+    <span id="time_span" class="btn btn-dark shadow-sm" style="position:fixed;left:0;bottom:0;">Time Left
         <span id="time_hours" class="btn badge-light"></span>
         <span class="badge badge-pill badge-secondary">Hours</span>
         <span class="badge badge-dark"><b>:</b></span>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotFound
-from .models import Exam,  McqQuestions, EssayQuestion, McqAnswer, ExamPaper
+from .models import Exam,  McqQuestion, EssayQuestion  # , McqOption
 from .forms import ExamUpdateForm
 from datetime import timedelta
 import threading
@@ -72,20 +72,18 @@ def mcq_paper(request):
     if not EXAM.status:
         return render(request, 'Error_pages/exam_not_found.html')
     elif request.method == 'POST':
-        if not ExamPaper.objects.filter(student=request.user, exam=EXAM.exam):
-            ExamPaper.objects.create(student=request.user, exam=EXAM.exam)
-        paper = ExamPaper.objects.filter(student=request.user, exam=EXAM.exam)[0]
         final = dict(request.POST.copy())
         final.pop('csrfmiddlewaretoken')
         answer_list = []
-        for qnum, answ in final.items():
-            question = McqQuestions.objects.get(id=qnum)
-            answer = McqAnswer.objects.create(paper=paper, question=question, answer=answ[0])
-            answer_list.append(answer)
+        # for qnum, answ in final.items():
+            # question = McqQuestion.objects.get(id=qnum)
+            # answer = McqOption.objects.create(question=question, answer=answ[0])
+            # answer_list.append(answer)
         return redirect('home')
     return render(request, 'mcq_sheet.html', {
         'exam': EXAM.exam,
-        'MCQs': McqQuestions.objects.all(),
+        'MCQs': McqQuestion.objects.all(),
+        'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None
     })
 
 
@@ -114,4 +112,5 @@ def essay_paper(request):
     return render(request, 'essay_sheet.html', {
         'exam': EXAM.exam,
         'Esys': EssayQuestion.objects.all(),
+        'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None
     })

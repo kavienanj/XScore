@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 class Exam(models.Model):
@@ -12,41 +13,29 @@ class Exam(models.Model):
         return str(self.exam_name) + ' held on ' + str(self.date)
 
 
-class McqQuestions(models.Model):
-    class Meta:
-        verbose_name = 'MCQ Question'
-        verbose_name_plural = 'MCQ Questions'
+class McqQuestion(models.Model):
     exam = models.ForeignKey(Exam, models.CASCADE)
     question = models.CharField('The MCQ Question', max_length=50)
-    answer_1 = models.CharField('Answer 1', max_length=25)
-    answer_2 = models.CharField('Answer 2', max_length=25)
-    answer_3 = models.CharField('Answer 3', max_length=25)
-    answer_4 = models.CharField('Answer 4', max_length=25)
-    correct = models.CharField('Correct answer', max_length=25)
 
     def __str__(self):
-        return 'MCQ ' + str(self.id) + ' of ' + str(self.exam.exam_name)
+        return 'MCQ' + str(self.id) + '<' + str(self.question) + '>'
 
-    def option_list(self):
-        return [self.answer_1, self.answer_2, self.answer_3, self.answer_4]
+    def get_choices(self):
+        return [(option.answer, option) for option in self.mcqoption_set.all()]
 
 
 class EssayQuestion(models.Model):
     exam = models.ForeignKey(Exam, models.CASCADE)
     question = models.CharField('The Essay Question', max_length=50)
-    working_file = models.FileField('File to work and submit', upload_to='essay_questions/')
+    working_file = models.FileField('File to work and submit', upload_to='essay_questions/', blank=True, null=True)
 
     def __str__(self):
         return 'Essay ' + str(self.id) + ' of ' + str(self.exam.exam_name)
 
 
 class ExamPaper(models.Model):
-
-    class Meta:
-        unique_together = (('student', 'exam'),)
-
     student = models.ForeignKey(User, models.CASCADE)
-    exam = models.ForeignKey(Exam, models.SET_NULL, null=True)
+    exam = models.ForeignKey(Exam, models.DO_NOTHING, null=True)
     mcq_marks = models.PositiveIntegerField('Total MCQ paper marks', null=True)
     essay_marks = models.PositiveIntegerField('Total Essay paper marks', null=True)
 
@@ -57,29 +46,26 @@ class ExamPaper(models.Model):
         return self.mcq_marks + self.essay_marks
 
 
-class McqAnswer(models.Model):
+class McqOption(models.Model):
+    # exam = models.ForeignKey(ExamPaper, models.DO_NOTHING, blank=True, null=True)
+    question = models.ForeignKey(McqQuestion, models.CASCADE, null=False)
+    option = models.CharField("Option for Question", max_length=25, null=False)
+    is_correct = models.BooleanField("Tick the correct answer", default=False)
 
-    class Meta:
-        unique_together = (('paper', 'question'),)
-
-    paper = models.ForeignKey(ExamPaper, models.CASCADE, verbose_name="Exam Paper", null=False)
-    question = models.ForeignKey(McqQuestions, models.CASCADE, null=False)
-    answer = models.CharField("Answer given", max_length=25, null=False)
-    is_correct = models.BooleanField(blank=True, null=True)
+    def clean(self):
+        super(McqOption, self).clean()
+        model = self.question
+        if model.mcqoption_set.count() > 4:
+            raise ValidationError("Can only create 5 mcq options for '%s'" % model.question)
 
     def __str__(self):
-        return f'Answer for MCQ {str(self.question.id)} of \
-{str(self.paper.student)} for {str(self.paper.exam.exam_name)}'
+        return f'Option for MCQ {str(self.question.id)} of {str(self.question.exam.exam_name)}'
 
 
 class EssayAnswer(models.Model):
-
-    class Meta:
-        unique_together = (('paper', 'question'),)
-
-    paper = models.ForeignKey(ExamPaper, models.CASCADE, verbose_name="Exam Paper", null=False)
+    # exam = models.ForeignKey(ExamPaper, models.DO_NOTHING, blank=True, null=True)
     question = models.ForeignKey(EssayQuestion, models.CASCADE, null=False)
-    answer = models.FileField("Answer submitted", null=False, upload_to='essay_answers/')
+    answer = models.FileField("File submitted", null=False, upload_to='essay_answers/')
     marks = models.IntegerField("Marks")
 
     def __str__(self):
