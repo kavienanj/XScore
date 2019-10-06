@@ -6,27 +6,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="shortcut icon" type="image/png" href="{% static 'icon.ico' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/logo.png' %}"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     {% block head %}
     {% endblock %}
 </head>
 
 
-<body>
+<body background="{% static 'img/backsite.jpg' %}">
 <main role="main">
     <header class="navbar navbar-dark bg-dark border-bottom">
         <a href="{% url 'welcome' %}" class="navbar-brand shadow-sm">
-            <img height="75px" width="229px" src="{% static 'navbar.ico' %}" class="rounded-pill border border-secondary"></a>
+            <img height="75px" width="229px" src="{% static 'img/navbar.ico' %}" class="rounded-pill border border-secondary"></a>
         <ul class="navbar-nav flex-row">
             {% if user.is_authenticated %}
             <li class="nav item"><span class="btn badge-info m-1 shadow-lg">
-                <img src="{% static 'userlogo.png' %}" height="15px" width="15px">
+                <img src="{% static 'img/userlogo.png' %}" height="15px" width="15px">
             <span class="badge badge-light">{{ user }}</span></span></li>
             <li class="nav item"><a href="{% url 'logout' %}" class="btn btn-outline-info m-1 shadow-lg">Log Out</a></li>
             {% else %}
             <li class="nav item"><a href="{% url 'login' %}" class="btn btn-info m-1 shadow-lg">Log In
-                <img src="{% static 'userlogo.png' %}" height="15px" width="15px"></a></li>
+                <img src="{% static 'img/userlogo.png' %}" height="15px" width="15px"></a></li>
             <li class="nav item"><a href="{% url 'signup' %}" class="btn btn-outline-info m-1 shadow-lg">Sign Up</a></li>
             {% endif %}
         </ul>
