@@ -18,7 +18,7 @@
         {% csrf_token %}
         <hr/>
         <div class="card-title">
-            <h4>Select the Exam,</h4>
+            <h4>Select the Exam</h4>
         </div>
         <div class="card border-dark shadow-sm">
             <ul class="list-group list-group-flush">
@@ -61,14 +61,13 @@
         {% endif %}
         </h4>
     </div>
-    <p class="card-text">
-        <button class="btn btn-secondary"
-            id="btn_started"
-            name="status" disabled>Started
-        </button>
-    <form>{% csrf_token %}
-    <button class="btn btn-danger" type="submit" id="btn_cancel" value="cancel">Cancel</button></form>
-    </p>
+    <hr>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-lg btn-secondary" id="btn_started" name="status" disabled>Started</button>
+        <button class="btn btn-lg btn-danger" id="btn_cancel" value="cancel">Cancel</button>
+    </form>
+    <hr>
     <span class="btn btn-dark"> Duration
         <span class="btn btn-success">{{ starts }}</span> to
         <span class="btn btn-danger">{{ ends }}</span>
@@ -98,14 +97,6 @@
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>
     <script type="text/javascript" src="{% static 'countdown.js' %}"></script>
-<script>
-   $("#btn_cancel").click(function () {
-       $.post(window.location, {
-           exam: "cancel",
-           csrfmiddlewaretoken: ("#btn_cancel").name
-       });
-   });
-</script>
 {% else %}
     <script type="text/javascript" src="{% static 'dbrd_form.js' %}"></script>
     <script>
@@ -121,9 +112,9 @@
                 };
             };
         };
-        function CancelOut {
+        function CancelOut () {
 
-        }
+        };
     </script>
 {% endif %}
 {% endblock %}

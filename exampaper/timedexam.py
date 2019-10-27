@@ -4,6 +4,7 @@ create a single object TimedExam() and handle it.
 """
 
 from datetime import datetime
+import threading
 
 
 class TimedExam:
@@ -13,6 +14,7 @@ class TimedExam:
         self.exam = None
         self.start = None
         self.over = None
+        self.timer = None
 
     @property
     def duration(self):
@@ -38,10 +40,15 @@ class TimedExam:
         self.exam.save()
         self.status = True
         self.start = datetime.now()
+        self.timer = threading.Timer(self.duration.total_seconds(), self.reset)
+        self.over = self.start + self.duration
         print(f"""
         ======= EXAM {self.exam} STARTED AT {self.start} ======
         """)
-        self.over = self.start + self.duration
+
+    def cancel_out(self):
+        self.timer.cancel()
+        self.reset()
 
     def reset(self):
         print(f"""

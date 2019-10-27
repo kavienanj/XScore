@@ -3,7 +3,6 @@ from django.http import HttpResponse, HttpResponseNotFound
 from .models import Exam,  McqQuestion, EssayQuestion  # , McqOption
 from .forms import ExamUpdateForm
 from datetime import timedelta
-import threading
 from .timedexam import TimedExam
 from django.contrib.auth.decorators import login_required
 
@@ -41,11 +40,9 @@ def admin_dashboard(request):
             exam.duration = timedelta(seconds=int(request.POST['duration'][0])*60)
             exam.save()
             EXAM.set_exam(exam)
-            countdown = threading.Timer(EXAM.duration.total_seconds(), EXAM.reset)
             EXAM.activate()
-            countdown.start()
-        elif request.method.is_ajax:
-            print(request)
+        elif request.method == 'POST' and EXAM.status:
+            EXAM.cancel_out()
         return render(request, 'dashboard.html', {
             'exam_set': Exam.objects.all(),
             'exam': EXAM.exam if EXAM.exam else False,
