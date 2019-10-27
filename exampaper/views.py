@@ -44,6 +44,8 @@ def admin_dashboard(request):
             countdown = threading.Timer(EXAM.duration.total_seconds(), EXAM.reset)
             EXAM.activate()
             countdown.start()
+        elif request.method.is_ajax:
+            print(request)
         return render(request, 'dashboard.html', {
             'exam_set': Exam.objects.all(),
             'exam': EXAM.exam if EXAM.exam else False,

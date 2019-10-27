@@ -61,10 +61,14 @@
         {% endif %}
         </h4>
     </div>
-    <p class="card-text"><button class="btn btn-secondary"
+    <p class="card-text">
+        <button class="btn btn-secondary"
             id="btn_started"
             name="status" disabled>Started
-    </button></p>
+        </button>
+    <form>{% csrf_token %}
+    <button class="btn btn-danger" type="submit" id="btn_cancel" value="cancel">Cancel</button></form>
+    </p>
     <span class="btn btn-dark"> Duration
         <span class="btn btn-success">{{ starts }}</span> to
         <span class="btn btn-danger">{{ ends }}</span>
@@ -94,6 +98,14 @@
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>
     <script type="text/javascript" src="{% static 'countdown.js' %}"></script>
+<script>
+   $("#btn_cancel").click(function () {
+       $.post(window.location, {
+           exam: "cancel",
+           csrfmiddlewaretoken: ("#btn_cancel").name
+       });
+   });
+</script>
 {% else %}
     <script type="text/javascript" src="{% static 'dbrd_form.js' %}"></script>
     <script>
@@ -109,6 +121,9 @@
                 };
             };
         };
+        function CancelOut {
+
+        }
     </script>
 {% endif %}
 {% endblock %}
