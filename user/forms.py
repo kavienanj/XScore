@@ -10,9 +10,6 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = [
             'username',
-            'first_name',
-            'last_name',
-            'email',
             'password1',
             'password2',
         ]
@@ -20,25 +17,21 @@ class SignUpForm(UserCreationForm):
             'class': 'form-control',
             'required': 'True',
         }) for field in fields}
-        widgets['email'] = forms.TextInput(attrs={
-            'type': 'email',
-            'class': 'form-control',
-            'required': 'True',
-        })
+        # widgets['email'] = forms.TextInput(attrs={'type': 'email', 'class': 'form-control','required': 'True',})
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
         self.fields['password1'].widget = forms.PasswordInput(attrs={'class': 'form-control'})
         self.fields['password2'].widget = forms.PasswordInput(attrs={'class': 'form-control'})
 
-    def clean_email(self):
+    '''def clean_email(self):
         email = self.cleaned_data['email']
         if User.objects.filter(email=email).count():
             raise forms.ValidationError("User with email already exists")
         page = requests.get(f'https://api.trumail.io/v2/lookups/json?email={email}')
         if not page.json()['deliverable']:
             raise forms.ValidationError("Invalid Email, Doesn't exist!")
-        return email
+        return email'''
 
 
 class UserUpdateForm(forms.ModelForm):

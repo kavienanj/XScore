@@ -2,15 +2,18 @@
 {% load static %}
 
 {% block head %}
-    <title>Accounts | Signup</title>
+    <title>Accounts | Students</title>
 {% endblock %}
 
-{% block upper %}Create New Account{% endblock %}
+{% block upper %}Create New Student{% endblock %}
 
 
 {% block dipper %}
 <h3 class="card-header">Fill these requirements!</h3>
 <div class="card-body">
+    <p align="left">
+        <a href="{% url 'dashboard' %}"> <b><</b> Back to Dashboard</a>
+    </p>
     <form method="post">
         {% csrf_token %}
 
@@ -29,7 +32,7 @@
         <button class="btn btn-success btn-lg"
                 id="btn_start"
                 name="status"
-                type="submit">Save
+                type="submit">Save and Add Another
         </button>
     </form>
 

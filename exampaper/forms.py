@@ -1,4 +1,4 @@
-from .models import Exam
+from .models import Exam, McqQuestion, McqOption
 from django import forms
 
 
@@ -18,7 +18,23 @@ class ExamUpdateForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'YYYY-MM-DD'
             }),
-            'duration': forms.TextInput(attrs={
-                'type': 'hidden',
+            'duration': forms.HiddenInput(),
+        }
+
+
+class QuestionAddForm(forms.ModelForm):
+    class Meta:
+        model = McqQuestion
+        fields = [
+            'exam',
+            'question',
+            'media',
+        ]
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'cols': '40',
+                'rows': '4',
+                'maxlength': 500,
             }),
         }

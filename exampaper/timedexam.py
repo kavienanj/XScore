@@ -35,21 +35,6 @@ class TimedExam:
             return self.over.strftime("%H:%M:%S")
         return None
 
-    def activate(self):
-        self.exam.active = True
-        self.exam.save()
-        self.status = True
-        self.start = datetime.now()
-        self.timer = threading.Timer(self.duration.total_seconds(), self.reset)
-        self.over = self.start + self.duration
-        print(f"""
-        ======= EXAM {self.exam} STARTED AT {self.start} ======
-        """)
-
-    def cancel_out(self):
-        self.timer.cancel()
-        self.reset()
-
     def reset(self):
         print(f"""
         ======= EXAM {self.exam} FINISHED AT {self.over} ======
@@ -57,3 +42,19 @@ class TimedExam:
         self.exam.active = False
         self.exam.save()
         self.__init__()
+
+    def activate(self, timedue):
+        self.exam.active = True
+        self.exam.save()
+        self.status = True
+        self.start = datetime.now()
+        self.timer = threading.Timer(timedue+10, self.reset)
+        self.over = self.start + self.duration
+        self.timer.start()
+        print(f"""
+        ======= EXAM {self.exam} STARTED AT {self.start} duration {timedue//60} minutes ======
+        """)
+
+    def cancel_out(self):
+        self.timer.cancel()
+        self.reset()

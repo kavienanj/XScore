@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('handlehere/', admin.site.urls),
     path('paper/', include('exampaper.urls')),
     path('accounts/', include('user.urls')),
     path('', lambda request: render(request, 'index.html'), name='welcome'),

@@ -4,7 +4,7 @@
     <title>Papers | GIT Portal</title>
 {% endblock %}
 
-{% block upper %}Paper{% endblock %}
+{% block upper %}GIT Portal{% endblock %}
 
 {% block dipper %}
 
@@ -17,12 +17,23 @@
 
 
 {% else %}
-<h3 class="card-header">Exam Paper</h3>
+<!--<h3 class="card-header">Exam Paper</h3>
 <div class="card-body">
     <p class="card-text">Select the Paper's part</p>
     <a href="{% url 'mcq' %}" class="btn btn-outline-dark btn-lg">MCQ</a>
-    <b>|</b> <a href="{% url 'essay' %}" class="btn btn-outline-dark btn-lg">Essay</a>
+    <b>|</b> <a href="{% url 'essay' %}" class="btn btn-outline-dark btn-lg">Essay</a>-->
+{% if mesg %}
+<h3 class="card-header">Submission Successful!, Thank You!</h3>
+<div class="card-body">
+    <p class="card-text">Your scored <span class="btn badge-info shadow-lg">{{ marks }}</span> marks!</p>
 </div>
+{% else %}
+<h3 class="card-header">Welcome</h3>
+<div class="card-body">
+    <p class="card-text">Click Start to proceed on Exam, Good Luck!</p>
+    <a href="{% url 'mcq' %}" class="btn btn-outline-dark btn-lg">Start</a>
+</div>
+{% endif %}
 {% endif %}
 
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Leader Board | {{ exam }}</title>
+{% endblock %}
+
+{% block upper %}{{ exam }}{% endblock %}
+
+{% block dipper %}
+
+<h3 class="card-header">Leader Board</h3>
+<div class="card-body">
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        {% if papers %}
+        <tr><th scope="col">Username</th><th scope="col">Marks</th></tr></thead>
+        {% for paper in papers %}
+        <tr><td>{{ paper.student }}</td><td>{{ paper.mcq_marks }}</td></tr>
+        {% endfor %}
+        {% else %}
+        <p class="card-text">No results available</p>
+        {% endif %}
+    </table>
+</div>
+
+{% endblock %}

@@ -9,51 +9,103 @@
 
 {% block dipper %}
 <h3 class="card-header">MCQ Questions</h3>
-<div class="card-body">
+<button id="status_mcq" hidden>not</button>
+<div class="card-body" style="padding:0;">
 
-    <div class="card-title">
-        <h4>
-        Click the correct answer within given options
-        </h4>
-    </div>
+    <form id="mcq_paper" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <nav>
+            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-mcq-tab" data-toggle="tab" href="#mcqp" role="tab" aria-controls="mcqp" aria-selected="true">MCQ</a>
+                <a class="nav-item nav-link" id="nav-essay-tab" data-toggle="tab" href="#essayp" role="tab" aria-controls="essayp" aria-selected="false">Essay</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="mcqp" role="tabpanel" aria-labelledby="nav-mcq-tab">
+        <div style="overflow:scroll;height:450px;">
+            <button name="status" hidden>Started</button>
 
-    <button name="status" hidden>Started</button>
-
-    <form id="mcq_paper" method="post">
-        {% csrf_token %}
         <ul class="list-group list-group-flush">
 
-            {% for mcq in MCQs %}
-            <li class="list-group-item">
+            {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+            <li id="q{{ forloop.counter }}" class="list-group-item" style="padding-top:0;min-height:450px;">
 
-                <div class="card border-dark shadow-lg">
-                <h5 class="card-header">{{ mcq.question }}</h5>
-                <ul class="list-group list-group-flush">
-
-                    {% for opt in mcq.mcqoption_set.all %}
-                    <li class="list-group-item" style="padding:2px">
+                <div class="card border-dark shadow-lg" style="margin-top:12px;margin-bottom:12px;">
+                    {% if mcq.media %}
+                    <div class="row no-gutters">
+                        <div class="col-md-3 media">
+                            <img src="{{ mcq.media.url }}" class="card-img">
+                        </div>
+                        <div class="col-md-9">
+                            <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                            <button type="button" class="btn btn-sm btn-danger" name="{{ mcq.id }}" onclick="flag_it(this);" data-toggle="button" aria-pressed="false" autocomplete="off">
+                                 flag</button ></h5>
+                            <div class="card-body" style="padding:0">
+                    {% else %}
+                    <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                             <button type="button" class="btn btn-sm btn-danger" name="{{ mcq.id }}" onclick="flag_it(this);" data-toggle="button" aria-pressed="false" autocomplete="off">
+                                 flag</button ></h5>
+                    {% endif %}
+                    <ul class="list-group list-group-flush" style="padding:0">
+                    {% for opt in mcq.get_choices %}
+                    <li class="list-group-item" style="padding:0">
                         <label name="label{{ mcq.id }}" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
-                            <input type="radio" class="btn-lg" name="{{ mcq.id }}" value="{{ option }}"
+                            <input type="radio" class="btn-lg" name="{{ mcq.id }}" value="{{ opt.id }}"
                                    onchange="swap_class(this);">
-                            <span style="margin:auto;">{{ opt.option }}</span>
+                            <span style="margin:auto;">{{ opt.option|safe }}</span>
                         </label>
                     </li>
                     {% endfor %}
-
-                </ul>
+                        </ul>
+                        {% if mcq.media %}
+                        </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </li>
-            {% endfor %}
-
+            {% endif %} {% endfor %}
         </ul>
-
-        <button class="btn btn-success btn-lg btn-block"
+        </div>
+            <div class="bg-light border-dark pb-3" style="overflow:scroll;position:fixed;right:0;bottom:20%;height:auto;width:110px;border-radius:14px;padding-top:.5px;padding-bottom:2px;">
+            <span class="btn badge-light">Question Numbers</span><br/>
+            {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+                <a href="#q{{ forloop.counter }}" name="btnq{{ mcq.id }}" class="btn btn-outline-dark"
+                   style="padding-top:2px;padding-bottom:2px;padding-left:4px;padding-right:4px;width:30px;height:30px;margin:1px;">
+                    {{ forloop.counter }}</a>
+            {%endif%}{%endfor%}
+            </div>
+        </div>
+            <div class="tab-pane fade" id="essayp" role="tabpanel" aria-labelledby="nav-essay-tab">
+            <div style="overflow:scroll;height:450px;">
+                <ul class="list-group list-group-flush">
+                    {% for essay in Esys %}
+                    <li class="list-group-item">
+                        <div class="card border-dark">
+                            <h5 class="card-header">{{ forloop.counter }}. {{ essay.question }}</h5>
+                            <div style="padding:3px;">
+                            <a class="btn btn-outline-dark mb-1" href="{% url 'download_essay' essay.id 'q' %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentcolor"
+                                     stroke-linecap="round" stroke-linejoin="round" stroke-width="3" aria-hidden="true"
+                                     viewBox="0 0 32 32" focusable="false">
+                                    <path d="M28 22v8H4v-8M16 4v20m-8-8l8 8 8-8"></path></svg>    Question File</a>
+                                  <div class="custom-file">
+                                    <input name="Es{{ essay.id }}" type="file" class="custom-file-input" id="inputGroupFile{{ forloop.counter }}">
+                                    <label class="custom-file-label" for="inputGroupFile{{ forloop.counter }}">Upload Answer file</label>
+                                  </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        </div>
+            <br/><hr/>
+    <button class="btn btn-success btn-lg btn-block"
                 value="Submitted MCQ Answers"
                 type="submit">Submit Answers
         </button>
     </form>
-    <br/>
-
 </div>
 
 <h1 id="time" content="{% url 'dashboard' %}">
@@ -74,20 +126,7 @@
 
 {% block js_script %}
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>
-    <script type="text/javascript" src="{% static 'countdown.js' %}"></script>
-    <script>
-        function swap_class (radio) {
-            var labels = document.getElementsByName("label"+radio.name);
-            var radio;
-            for(var i = 0; i < labels.length; i++){
-                radio = labels[i].childNodes[1];
-                if (radio.checked) {
-                    labels[i].className =  "d-flex align-items-center border-secondary list-group-item-success";
-                } else {
-                    labels[i].className = "d-flex align-items-center border-secondary";
-                };
-            };
-        };
-    </script>
+    <!--<script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>-->
+    <script type="text/javascript" src="{% static 'mcq_js.js' %}"></script>
+    <script type="text/javascript" src="{% static 'countdownjs.js' %}"></script>
 {% endblock %}

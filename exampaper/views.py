@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotFound
-from .models import Exam,  McqQuestion, EssayQuestion  # , McqOption
-from .forms import ExamUpdateForm
+from .models import Exam,  McqQuestion, EssayQuestion, McqOption, ExamPaper, EssayAnswer
+from .forms import ExamUpdateForm, QuestionAddForm
 from datetime import timedelta
+import random
 from .timedexam import TimedExam
 from django.contrib.auth.decorators import login_required
 
@@ -12,7 +13,13 @@ EXAM = TimedExam()
 
 @login_required
 def home(request):
-    return render(request, 'papers.html')
+    mesg, marks = None, None
+    if not request.user.is_superuser:
+        paper = ExamPaper.objects.filter(student=request.user, exam=EXAM.exam)
+        if paper:
+            mesg = 'Thank You!'
+            marks = paper[0].mcq_marks
+    return render(request, 'papers.html', {'mesg': mesg, 'marks': marks})
 
 
 @login_required
@@ -32,15 +39,63 @@ def create_paper(request, id=None):
         return redirect('home')
 
 
+def view_paper(request, id):
+    exam = Exam.objects.get(id=id)
+    if request.user.is_superuser:
+        return render(request, 'viewquestions.html', {
+            'exam': exam,
+            'MCQs': list(McqQuestion.objects.filter(exam=exam)),
+            'Esys': list(EssayQuestion.objects.filter(exam=exam)),
+        })
+    else:
+        return redirect('home')
+
+
+@login_required
+def add_question(request, id, q_id=None, del_q="false"):
+    if request.user.is_superuser:
+        exam = Exam.objects.get(id=id)
+        q = McqQuestion.objects.get(id=q_id) if q_id else None
+        if request.is_ajax() and del_q == "true":
+            q.delete()
+            return HttpResponse("success")
+        ques_form = QuestionAddForm(instance=q)
+        if request.method == 'POST':
+            ques_form = QuestionAddForm(request.POST, request.FILES, instance=q)
+            if ques_form.is_valid():
+                ques_form.exam = exam
+                ques_form.save()
+                if q:
+                    for opt in q.get_choices():
+                        opt.option = request.POST['op_'+str(opt.id)]
+                        opt.is_correct = 'op_'+str(opt.id) == request.POST['option_correct']
+                        opt.save()
+                    return redirect('view_paper', id)
+                for opt in range(1, 5):
+                    McqOption.objects.create(
+                        question=ques_form.instance,
+                        option=request.POST['option_'+str(opt)],
+                        is_correct='option_'+str(opt) == request.POST['option_correct'],
+                    )
+                ques_form = QuestionAddForm()
+        return render(request, 'addquestion.html', {
+            'form': ques_form,
+            'the_exam': exam,
+            'instance': q if q else False
+        })
+    else:
+        return redirect('home')
+
+
 @login_required
 def admin_dashboard(request):
     if request.user.is_superuser:
         if request.method == 'POST' and not EXAM.status:
             exam = Exam.objects.get(id=int(request.POST['exam'][0]))
-            exam.duration = timedelta(seconds=int(request.POST['duration'][0])*60)
+            exam.duration = timedelta(seconds=int(request.POST['duration'])*60)
             exam.save()
             EXAM.set_exam(exam)
-            EXAM.activate()
+            EXAM.activate(int(request.POST['duration'])*60)
         elif request.method == 'POST' and EXAM.status:
             EXAM.cancel_out()
         return render(request, 'dashboard.html', {
@@ -67,31 +122,49 @@ def results(request, answer_list):
 
 
 @login_required
+def leader_board(request, id):
+    if request.user.is_superuser:
+        papers = ExamPaper.objects.filter(exam=Exam.objects.get(id=id))
+        if papers:
+            papers = papers.order_by('-student')
+        return render(request, 'leaderboard.html', {'papers': papers, 'exam': Exam.objects.get(id=id)})
+    else:
+        return redirect('home')
+
+
+@login_required
 def mcq_paper(request):
-    if not EXAM.status:
+    if not EXAM.status:  # or ExamPaper.objects.filter(student=request.user, exam=EXAM.exam):
         return render(request, 'Error_pages/exam_not_found.html')
     elif request.method == 'POST':
+        print(request.POST, request.FILES)
         final = dict(request.POST.copy())
+        final_files = dict(request.FILES.copy())
         final.pop('csrfmiddlewaretoken')
-        answer_list = []
-        # for qnum, answ in final.items():
-            # question = McqQuestion.objects.get(id=qnum)
-            # answer = McqOption.objects.create(question=question, answer=answ[0])
-            # answer_list.append(answer)
+        points = 0
+        for qnum, answ in final.items():
+            if qnum.startswith('Es'):
+                es = EssayQuestion.objects.get(id=int(qnum[2:]))
+                print(es, final_files.keys())
+                # EssayAnswer.objects.create(student=request.user, question=es, answer=request.FILES[qnum])
+            else:
+                question = McqQuestion.objects.get(id=int(qnum))
+                if question.get_answer() == McqOption.objects.get(id=int(answ[0])):
+                    points += 1
+        # ExamPaper.objects.create(student=request.user, exam=EXAM.exam, mcq_marks=points)
         return redirect('home')
     return render(request, 'mcq_sheet.html', {
         'exam': EXAM.exam,
-        'MCQs': McqQuestion.objects.all(),
+        'MCQs': sorted(list(McqQuestion.objects.filter(exam=EXAM.exam)), key=lambda x: random.random()),
+        'Esys': EssayQuestion.objects.all(),
         'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None
     })
 
 
 @login_required
-def download_essay(request, id):
-    if not EXAM.status:
-        return HttpResponseNotFound('</br></br><h1><b>Your Exam is not not available now!</b></h1>')
+def download_essay(request, id, kind):
     file = EssayQuestion.objects.get(id=int(id))
-    path = file.working_file.path
+    path = file.working_file.path if kind == 'q' else file.correct_file.path
     try:
         with open(path, 'rb') as f:
             file_data = f.read()

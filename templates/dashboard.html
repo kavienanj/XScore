@@ -13,7 +13,10 @@
 <div class="card-body">
 
     {% if not exam %}
-    <p align="left"><a href="{% url 'create_paper' %}">Create New Exam..</a></p>
+    <p align="left">
+        <a href="{% url 'create_paper' %}">Create New Exam..</a><br/>
+        <a href="{% url 'signup' %}">Create Students..</a>
+    </p>
     <form method="post">
         {% csrf_token %}
         <hr/>
@@ -28,7 +31,18 @@
                         <input type="radio" class="btn-lg" name="exam" value="{{ a_exam.id }}"
                                onchange="swap_class(this);" required>
                         <span style="margin:auto;">{{ a_exam }}</span>
-                        <span style="margin-left:0;"><a href="{% url 'create_paper' a_exam.id %}">edit</a></span>
+                        <span style="margin-right:100;">
+                            <a href="{% url 'leaderboard' a_exam.id %}"> leaderboard </a> |
+                            <div class="btn-group">
+                                <button class="bg-transparent btn-outline-primary dropdown-toggle text-primary" id="dropdownMenuButton{{ forloop.counter }}" data-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false">
+                                    other options</button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                                        <a class="dropdown-item" href="{% url 'create_paper' a_exam.id %}"> edit </a>
+                                        <a class="dropdown-item" href="{% url 'add_question' a_exam.id %}"> add Questions </a>
+                                        <a class="dropdown-item" href="{% url 'view_paper' a_exam.id %}"> view Questions </a>
+                                    </div>
+                            </div>
+                        </span>
                     </label>
                 </li>
                 {% endfor %}
@@ -39,12 +53,12 @@
             <h4>Set Time Duration</h4>
         </div>
         <input id="duration" name="duration" class="custom-range" type="range" min="1" max="360" step="1" value="1" oninput="show_value(this.value);"/>
-        <h1><span class="btn btn-dark shadow-lg">
+        <h1><span class="btn badge-dark shadow-lg">
             <span id="hours" class="btn badge-light">0</span>
-            <span class="badge badge-pill badge-secondary">Hours</span>
-            <span class="badge badge-dark"><b>:</b></span>
+            <span class="badge badge-pill badge-secondary shadow-lg">Hours</span>
+            <span class="badge badge-dark shadow-lg"><b>:</b></span>
             <span id="minutes" class="btn badge-light">1</span>
-            <span class="badge badge-pill badge-secondary">Minutes</span>
+            <span class="badge badge-pill badge-secondary shadow-lg">Minutes</span>
         </span></h1>
         <hr/>
         <button class="btn btn-success btn-lg shadow-sm"
@@ -57,6 +71,7 @@
     <div class="card-title">
         <h4>
         {% if exam %} Exam {{ exam }} is active!
+            <a href="{% url 'leaderboard' exam.id %}">Show leaderboard </a>
         {% else %} Select an Exam to start,
         {% endif %}
         </h4>
@@ -64,7 +79,7 @@
     <hr>
     <form method="post">
         {% csrf_token %}
-        <button class="btn btn-lg btn-secondary" id="btn_started" name="status" disabled>Started</button>
+        <button class="btn btn-lg btn-outline-secondary" id="btn_started" name="status" disabled>Started</button>
         <button class="btn btn-lg btn-danger" id="btn_cancel" value="cancel">Cancel</button>
     </form>
     <hr>
@@ -75,7 +90,7 @@
 
     <h1 id="time" content="{% url 'dashboard' %}">
         <span id="end_time_hidden" hidden>{{ over }}</span>
-        <span id="time_span" class="btn btn-dark shadow-sm">
+        <span id="time_span" class="btn btn-dark shadow-lg">
             <span id="time_hours" class="btn badge-light"></span>
             <span class="badge badge-pill badge-secondary">Hours</span>
             <span class="badge badge-dark"><b>:</b></span>
@@ -95,26 +110,8 @@
 {% block js_script %}
 {% if exam %}
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>
-    <script type="text/javascript" src="{% static 'countdown.js' %}"></script>
+    <script type="text/javascript" src="{% static 'countdownjs.js' %}"></script>
 {% else %}
-    <script type="text/javascript" src="{% static 'dbrd_form.js' %}"></script>
-    <script>
-        function swap_class (radio) {
-            var labels = document.getElementsByName("labels");
-            var radio;
-            for(var i = 0; i < labels.length; i++){
-                radio = labels[i].childNodes[1];
-                if (radio.checked) {
-                    labels[i].className =  "d-flex align-items-center border-secondary list-group-item-success";
-                } else {
-                    labels[i].className = "d-flex align-items-center border-secondary";
-                };
-            };
-        };
-        function CancelOut () {
-
-        };
-    </script>
+    <script type="text/javascript" src="{% static 'dboard_form.js' %}"></script>
 {% endif %}
 {% endblock %}

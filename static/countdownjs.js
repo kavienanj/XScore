@@ -1,6 +1,7 @@
 var Url = document.getElementById("time").getAttribute("content");
 var endTime = document.getElementById("end_time_hidden").innerHTML;
 var countDownTime = new Date(endTime).getTime();
+var type = document.getElementsByClassName("card-header")[0];
 var clock = setInterval(function() {
         var now = new Date().getTime();
         var distance = countDownTime - now;
@@ -19,9 +20,15 @@ var clock = setInterval(function() {
         };
         if (distance <= 0) {
             clearInterval(clock);
-            document.getElementById("time").innerHTML = "EXPIRED";
-            window.onbeforeunload = null;
-            window.location.replace(window.location);
+            document.getElementById("time").innerHTML = "<button class='btn btn-outline-dark btn-lg' disabled><span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span> Finishing Exam...</button>";
+            window.onbeforeunload == null;
+            if (type.innerHTML == "MCQ Questions") {
+                document.getElementById("mcq_paper").submit();
+            } else {
+                setTimeout(function(){
+                    window.location.replace(window.location);
+                }, 12000);
+            };
             return;
         };
     }, 1000);
