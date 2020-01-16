@@ -26,7 +26,7 @@ SECRET_KEY = '!=ij&h&&i*x9+4r9ul+c*=^1ixa6$(^jc4!c=wy#99bf4)i^&&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []  # ['192.168.1.4']
+ALLOWED_HOSTS = ['x-score.herokuapp.com']  # ['192.168.1.4']
 
 LOGIN_URL = 'login'
 
