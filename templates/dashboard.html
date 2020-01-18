@@ -2,37 +2,45 @@
 {% load static %}
 
 {% block head %}
-    <title>Admin Dashboard</title>
+    <title>Dashboard</title>
 {% endblock %}
 
-{% block upper %}Admin Dashboard{% endblock %}
+{% block upper %}Dashboard{% endblock %}
 
 
 {% block dipper %}
 <h3 class="card-header">Dashboard</h3>
 <div class="card-body">
 
-    {% if not exam %}
+    {% if request.user.is_superuser %}
     <p align="left">
-        <a href="{% url 'create_paper' %}">Create New Exam..</a><br/>
-        <a href="{% url 'signup' %}">Create Students..</a>
+        <a href="{% url 'create_paper' %}">Create New Exam..</a>
     </p>
+    {% else %}
     <form method="post">
         {% csrf_token %}
+        {% endif %}
         <hr/>
         <div class="card-title">
+            {% if request.user.is_superuser %}
+            <h4>Edit Exams</h4>
+            {% else %}
             <h4>Select the Exam</h4>
+            {% endif %}
         </div>
         <div class="card border-dark shadow-sm">
             <ul class="list-group list-group-flush">
                 {% for a_exam in exam_set %}
                 <li class="list-group-item" style="padding:2px">
                     <label name="labels" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
+                        {% if not request.user.is_superuser %}
                         <input type="radio" class="btn-lg" name="exam" value="{{ a_exam.id }}"
                                onchange="swap_class(this);" required>
+                        {% endif %}
                         <span style="margin:auto;">{{ a_exam }}</span>
                         <span style="margin-right:100;">
-                            <a href="{% url 'leaderboard' a_exam.id %}"> leaderboard </a> |
+                            <a href="{% url 'leaderboard' a_exam.id %}"> leaderboard </a>
+                            {% if request.user.is_superuser %}|
                             <div class="btn-group">
                                 <button class="bg-transparent btn-outline-primary dropdown-toggle text-primary" id="dropdownMenuButton{{ forloop.counter }}" data-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false">
                                     other options</button>
@@ -42,6 +50,7 @@
                                         <a class="dropdown-item" href="{% url 'view_paper' a_exam.id %}"> view Questions </a>
                                     </div>
                             </div>
+                            {% endif %}
                         </span>
                     </label>
                 </li>
@@ -49,69 +58,19 @@
             </ul>
         </div>
         <hr/>
-        <div class="card-title">
-            <h4>Set Time Duration</h4>
-        </div>
-        <input id="duration" name="duration" class="custom-range" type="range" min="1" max="360" step="1" value="1" oninput="show_value(this.value);"/>
-        <h1><span class="btn badge-dark shadow-lg">
-            <span id="hours" class="btn badge-light">0</span>
-            <span class="badge badge-pill badge-secondary shadow-lg">Hours</span>
-            <span class="badge badge-dark shadow-lg"><b>:</b></span>
-            <span id="minutes" class="btn badge-light">1</span>
-            <span class="badge badge-pill badge-secondary shadow-lg">Minutes</span>
-        </span></h1>
-        <hr/>
+        {% if not request.user.is_superuser %}
         <button class="btn btn-success btn-lg shadow-sm"
                 id="btn_start"
                 type="submit">Start
         </button>
+        {% else %}
     </form>
-
-{% else %}
-    <div class="card-title">
-        <h4>
-        {% if exam %} Exam {{ exam }} is active!
-            <a href="{% url 'leaderboard' exam.id %}">Show leaderboard </a>
-        {% else %} Select an Exam to start,
-        {% endif %}
-        </h4>
-    </div>
-    <hr>
-    <form method="post">
-        {% csrf_token %}
-        <button class="btn btn-lg btn-outline-secondary" id="btn_started" name="status" disabled>Started</button>
-        <button class="btn btn-lg btn-danger" id="btn_cancel" value="cancel">Cancel</button>
-    </form>
-    <hr>
-    <span class="btn btn-dark"> Duration
-        <span class="btn btn-success">{{ starts }}</span> to
-        <span class="btn btn-danger">{{ ends }}</span>
-    </span>
-
-    <h1 id="time" content="{% url 'dashboard' %}">
-        <span id="end_time_hidden" hidden>{{ over }}</span>
-        <span id="time_span" class="btn btn-dark shadow-lg">
-            <span id="time_hours" class="btn badge-light"></span>
-            <span class="badge badge-pill badge-secondary">Hours</span>
-            <span class="badge badge-dark"><b>:</b></span>
-            <span id="time_minutes" class="btn badge-light"></span>
-            <span class="badge badge-pill badge-secondary">Minutes</span>
-            <span class="badge badge-dark"><b>:</b></span>
-            <span id="time_seconds" class="btn badge-light"></span>
-            <span class="badge badge-pill badge-secondary">Seconds</span>
-        </span>
-    </h1>
-    {% endif %}
-
+{% endif %}
 </div>
 {% endblock %}
 
 
 {% block js_script %}
-{% if exam %}
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="{% static 'countdownjs.js' %}"></script>
-{% else %}
-    <script type="text/javascript" src="{% static 'dboard_form.js' %}"></script>
-{% endif %}
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src="{% static 'dboard_form.js' %}"></script>
 {% endblock %}

@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseNotFound
-from .models import Exam,  McqQuestion, EssayQuestion, McqOption, ExamPaper, EssayAnswer
+from django.http import HttpResponse
+from .models import Exam,  McqQuestion, McqOption, ExamPaper
 from .forms import ExamUpdateForm, QuestionAddForm
 from datetime import timedelta
 import random
+from datetime import datetime
 from .timedexam import TimedExam
 from django.contrib.auth.decorators import login_required
 
@@ -15,7 +16,7 @@ EXAM = TimedExam()
 def home(request):
     mesg, marks = None, None
     if not request.user.is_superuser:
-        paper = ExamPaper.objects.filter(student=request.user, exam=EXAM.exam)
+        paper = ExamPaper.objects.filter(student=request.user, exam=EXAM.exam)[0].has_submitted
         if paper:
             mesg = 'Thank You!'
             marks = paper[0].mcq_marks
@@ -45,7 +46,6 @@ def view_paper(request, id):
         return render(request, 'viewquestions.html', {
             'exam': exam,
             'MCQs': list(McqQuestion.objects.filter(exam=exam)),
-            'Esys': list(EssayQuestion.objects.filter(exam=exam)),
         })
     else:
         return redirect('home')
@@ -88,25 +88,39 @@ def add_question(request, id, q_id=None, del_q="false"):
 
 
 @login_required
-def admin_dashboard(request):
-    if request.user.is_superuser:
-        if request.method == 'POST' and not EXAM.status:
-            exam = Exam.objects.get(id=int(request.POST['exam'][0]))
-            exam.duration = timedelta(seconds=int(request.POST['duration'])*60)
-            exam.save()
-            EXAM.set_exam(exam)
-            EXAM.activate(int(request.POST['duration'])*60)
-        elif request.method == 'POST' and EXAM.status:
-            EXAM.cancel_out()
-        return render(request, 'dashboard.html', {
-            'exam_set': Exam.objects.all(),
-            'exam': EXAM.exam if EXAM.exam else False,
-            'starts': EXAM.cleaned_start(),
-            'ends': EXAM.cleaned_over(),
-            'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None,
-        })
-    else:
-        return redirect('home')
+def mcq_paper(request, id):
+    exam = Exam.objects.get(id=id)
+    paper = ExamPaper.objects.filter(student=request.user, exam=exam)[0]
+    if paper.has_submitted:
+        return render(request, 'Error_pages/exam_not_found.html')
+    elif request.method == 'POST':
+        final = dict(request.POST.copy())
+        final.pop('csrfmiddlewaretoken')
+        points = 0
+        for qnum, answ in final.items():
+            question = McqQuestion.objects.get(id=int(qnum))
+            if question.get_answer() == McqOption.objects.get(id=int(answ[0])):
+                points += 1
+        paper.has_submitted = True
+        paper.save()
+        return redirect('dashboard')
+    return render(request, 'mcq_sheet.html', {
+        'exam': exam,
+        'MCQs': sorted(list(McqQuestion.objects.filter(exam=exam)), key=lambda x: random.random()),
+        'over': (datetime.now() + paper.remaining_time).strftime("%b %d, %Y %H:%M:%S")
+    })
+
+
+@login_required
+def dashboard(request):
+    if request.method == 'POST':
+        exam = Exam.objects.get(id=request.POST['exam'])
+        if not ExamPaper.objects.filter(student=request.user, exam=exam):
+            ExamPaper.objects.create(student=request.user, exam=exam, remaining_time=exam.duration)
+        return redirect('mcq', exam.id)
+    return render(request, 'dashboard.html', {
+        'exam_set': Exam.objects.all(),
+    })
 
 
 @login_required
@@ -131,58 +145,3 @@ def leader_board(request, id):
     else:
         return redirect('home')
 
-
-@login_required
-def mcq_paper(request):
-    if not EXAM.status:  # or ExamPaper.objects.filter(student=request.user, exam=EXAM.exam):
-        return render(request, 'Error_pages/exam_not_found.html')
-    elif request.method == 'POST':
-        print(request.POST, request.FILES)
-        final = dict(request.POST.copy())
-        final_files = dict(request.FILES.copy())
-        final.pop('csrfmiddlewaretoken')
-        points = 0
-        for qnum, answ in final.items():
-            if qnum.startswith('Es'):
-                es = EssayQuestion.objects.get(id=int(qnum[2:]))
-                print(es, final_files.keys())
-                # EssayAnswer.objects.create(student=request.user, question=es, answer=request.FILES[qnum])
-            else:
-                question = McqQuestion.objects.get(id=int(qnum))
-                if question.get_answer() == McqOption.objects.get(id=int(answ[0])):
-                    points += 1
-        # ExamPaper.objects.create(student=request.user, exam=EXAM.exam, mcq_marks=points)
-        return redirect('home')
-    return render(request, 'mcq_sheet.html', {
-        'exam': EXAM.exam,
-        'MCQs': sorted(list(McqQuestion.objects.filter(exam=EXAM.exam)), key=lambda x: random.random()),
-        'Esys': EssayQuestion.objects.all(),
-        'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None
-    })
-
-
-@login_required
-def download_essay(request, id, kind):
-    file = EssayQuestion.objects.get(id=int(id))
-    path = file.working_file.path if kind == 'q' else file.correct_file.path
-    try:
-        with open(path, 'rb') as f:
-            file_data = f.read()
-        response = HttpResponse(file_data)
-        response['Content-Disposition'] = f'attachment; filename="{file.working_file.name}"'
-    except IOError:
-        response = HttpResponseNotFound('<h1>File not exist</h1>')
-    return response
-
-
-@login_required
-def essay_paper(request):
-    if not EXAM.status:
-        return render(request, 'Error_pages/exam_not_found.html')
-    if request.method == 'POST':
-        print(request.POST, request.FILES)
-    return render(request, 'essay_sheet.html', {
-        'exam': EXAM.exam,
-        'Esys': EssayQuestion.objects.all(),
-        'over': EXAM.over.strftime("%b %d, %Y %H:%M:%S") if EXAM.status else None
-    })
