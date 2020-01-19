@@ -31,7 +31,7 @@
             </div>
         {% endfor %}
 
-        <input id="id_duration" name="duration" class="custom-range" type="range" min="1" max="360" step="1" value="1" oninput="show_value(this.value);"/>
+        <input id="id_duration" name="durationx" class="custom-range" type="range" min="1" max="360" step="1" value="{% if duration %}{{ duration }}{% else %}1{% endif %}" oninput="show_value(this.value);"/>
         <h1><span class="btn btn-dark">
             <span id="hours" class="btn badge-light">0</span>
             <span class="badge badge-pill badge-secondary">Hours</span>
@@ -52,5 +52,5 @@
 
 {% block js_script %}
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="{% static 'dboard_form.js' %}"></script>
+    <script type="text/javascript" src="{% static 'addq.js' %}"></script>
 {% endblock %}

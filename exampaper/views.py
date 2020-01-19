@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Exam,  McqQuestion, McqOption, ExamPaper
 from .forms import ExamUpdateForm, QuestionAddForm
-from datetime import timedelta
+# from datetime import timedelta
 import random
 from datetime import datetime
 from .timedexam import TimedExam
@@ -35,6 +35,7 @@ def create_paper(request, id=None):
                 return redirect('dashboard')
         return render(request, 'create_exam.html', {
             'form': exam_form,
+            'duration': exam.duration.seconds/60 if exam else None,
         })
     else:
         return redirect('home')
@@ -118,8 +119,11 @@ def dashboard(request):
         if not ExamPaper.objects.filter(student=request.user, exam=exam):
             ExamPaper.objects.create(student=request.user, exam=exam, remaining_time=exam.duration)
         return redirect('mcq', exam.id)
+    exam_set = Exam.objects.all()
+    check_exam_set = {exp.exam: exp for exp in request.user.exampaper_set.all()}
     return render(request, 'dashboard.html', {
-        'exam_set': Exam.objects.all(),
+        'exam_set': exam_set,
+        'check_exam_set': check_exam_set,
     })
 
 

@@ -25,7 +25,7 @@
             {% if request.user.is_superuser %}
             <h4>Edit Exams</h4>
             {% else %}
-            <h4>Select the Exam</h4>
+            <h4>Select the Quiz</h4>
             {% endif %}
         </div>
         <div class="card border-dark shadow-sm">
@@ -33,13 +33,14 @@
                 {% for a_exam in exam_set %}
                 <li class="list-group-item" style="padding:2px">
                     <label name="labels" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
-                        {% if not request.user.is_superuser %}
+                        {% if not request.user.is_superuser and not a_exam in check_exam_set.keys %}
                         <input type="radio" class="btn-lg" name="exam" value="{{ a_exam.id }}"
                                onchange="swap_class(this);" required>
                         {% endif %}
-                        <span style="margin:auto;">{{ a_exam }}</span>
+                        <span class="{% if a_exam in check_exam_set.keys %}text-secondary{% endif %}" style="margin:auto;">
+                            {{ a_exam }} {% if a_exam in check_exam_set.keys %}<span class="text-success">   (Completed)</span>{% endif %}</span>
                         <span style="margin-right:100;">
-                            <a href="{% url 'leaderboard' a_exam.id %}"> leaderboard </a>
+                            <a href="{% url 'leaderboard' a_exam.id %}">leaderboard </a>
                             {% if request.user.is_superuser %}|
                             <div class="btn-group">
                                 <button class="bg-transparent btn-outline-primary dropdown-toggle text-primary" id="dropdownMenuButton{{ forloop.counter }}" data-toggle="dropdown" type="button" aria-haspopup="true" aria-expanded="false">
@@ -59,13 +60,17 @@
         </div>
         <hr/>
         {% if not request.user.is_superuser %}
-        <button class="btn btn-success btn-lg shadow-sm"
-                id="btn_start"
-                type="submit">Start
-        </button>
+         {% if exam_set|length == check_exam_set|length %}
+            <h2 class="text-success">Quiz Completed</h2>
+         {% else %}
+            <button class="btn btn-success btn-lg shadow-sm"
+                    id="btn_start"
+                    type="submit">Start
+            </button>
+         {% endif %}
         {% else %}
-    </form>
-{% endif %}
+        </form>
+        {% endif %}
 </div>
 {% endblock %}
 

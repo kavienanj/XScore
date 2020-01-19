@@ -7,7 +7,6 @@ class Exam(models.Model):
     exam_name = models.CharField('The Exam', max_length=25)
     date = models.DateField('Date Held')
     duration = models.DurationField('Time Duration')
-    active = models.BooleanField('Exam is active', default=False)
 
     def num_valid_questions(self):
         return len([q for q in self.mcqquestion_set.all() if q.check_if_valid()])
