@@ -14,7 +14,8 @@
 <div class="card-body" style="padding:0;">
     <p align="left" style="margin-left:25px;margin-top:15px;">
         <a href="{% url 'dashboard' %}"> <b><</b> Back to Dashboard</a> &nbsp;&nbsp;| &nbsp;&nbsp;
-        <a href="{% url 'add_question' exam.id %}">Add Questions <b>></b></a><br/>
+        <a href="{% url 'add_question' exam.id 'mcq' %}">Add MCQ Questions <b>></b></a> &nbsp;&nbsp;| &nbsp;&nbsp;
+        <a href="{% url 'add_question' exam.id 'esy' %}">Add Essay Questions <b>></b></a><br/>
         <span class="badge badge-info">Added Questions :- <span id="addedqnum">{{ exam.num_valid_questions }}</span></span>
         <span id="alerts" class="badge badge-success ml-5"></span>
     </p>
@@ -38,14 +39,14 @@
                             </div>
                             <div class="col-md-9">
                                 <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
-                                    <p align="right"><a href="{% url 'edit_question' exam.id mcq.id %}">edit</a>
-                                        | <a href="{% url 'delete_question' exam.id mcq.id 'true' %}" onclick="event.preventDefault();delete_q(this, q{{ forloop.counter }});">remove</a></p>
+                                    <p align="right"><a href="{% url 'edit_question' exam.id 'mcq' mcq.id %}">edit</a>
+                                        | <a href="{% url 'delete_question' 'mcq' mcq.id %}" onclick="event.preventDefault();delete_q(this, q{{ forloop.counter }});">remove</a></p>
                                 </h5>
                                 <div class="card-body" style="padding:0">
                                     {% else %}
                                     <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
-                                        <p align="right" style="margin-bottom:2px;"><a href="{% url 'edit_question' exam.id mcq.id %}">edit</a>
-                                            | <a href="{% url 'delete_question' exam.id mcq.id 'true' %}" onclick="event.preventDefault();delete_q(this, q{{ forloop.counter }});">remove</a>
+                                        <p align="right" style="margin-bottom:2px;"><a href="{% url 'edit_question' exam.id 'mcq' mcq.id %}">edit</a>
+                                            | <a href="{% url 'delete_question' 'mcq' mcq.id %}" onclick="event.preventDefault();delete_q(this, q{{ forloop.counter }});">remove</a>
                                         </p>
                                     </h5>
                                     {% endif %}
@@ -74,7 +75,7 @@
                 <a href="#q{{ forloop.counter }}" name="nq{{ forloop.counter }}" class="btn btn-sm btn-outline-dark"
                    style="padding-top:2px;padding-bottom:2px;padding-left:4px;padding-right:4px;width:30px;height:30px;margin:1px;">
                     {{ forloop.counter }}</a>
-                {%endif%}{%endfor%}
+                {% endif %} {% endfor %}
             </div>
         </div>
         <div class="tab-pane fade" id="essayp" role="tabpanel" aria-labelledby="nav-essay-tab">
@@ -83,14 +84,17 @@
                     {% for essay in Esys %}
                     <li class="list-group-item">
                         <div class="card border-dark">
-                            <h5 class="card-header">{{ forloop.counter }}. {{ essay.question }}</h5>
+                            <h5 class="card-header">{{ forloop.counter }}. {{ essay.question|safe }}</h5>
                             <div style="padding:3px;">
                             <a class="btn btn-outline-dark mb-1" href="{{ essay.working_file.url }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentcolor"
                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="3" aria-hidden="true"
                                      viewBox="0 0 32 32" focusable="false">
                                     <path d="M28 22v8H4v-8M16 4v20m-8-8l8 8 8-8"></path></svg>    Question File</a>
-                            {% if essay.correct_file %}<a class="btn btn-success" href="{{ essay.correct_file.url }}">Answer File</a>{%endif%}
+                                    <p align="right" style="margin-bottom:2px;"><a href="{% url 'edit_question' exam.id 'esy' essay.id %}">edit</a>
+                                         | <a href="{% url 'delete_question' 'esy' essay.id %}" onclick="event.preventDefault();delete_q(this, q{{ forloop.counter }});">remove</a>
+                                    </p>
+                            {% if essay.correct_file %}<a class="btn btn-success" href="{{ essay.correct_file.url }}">Answer File</a>{% endif %}
                             </div>
                         </div>
                     </li>

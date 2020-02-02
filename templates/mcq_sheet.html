@@ -72,7 +72,7 @@
                 <a href="#q{{ forloop.counter }}" name="btnq{{ mcq.id }}" class="btn btn-outline-dark"
                    style="padding-top:2px;padding-bottom:2px;padding-left:4px;padding-right:4px;width:30px;height:30px;margin:1px;">
                     {{ forloop.counter }}</a>
-            {%endif%}{%endfor%}
+            {% endif %}{% endfor %}
             </div>
         </div>
             <div class="tab-pane fade" id="essayp" role="tabpanel" aria-labelledby="nav-essay-tab">
@@ -81,9 +81,9 @@
                     {% for essay in Esys %}
                     <li class="list-group-item">
                         <div class="card border-dark">
-                            <h5 class="card-header">{{ forloop.counter }}. {{ essay.question }}</h5>
+                            <h5 class="card-header">{{ forloop.counter }}. {{ essay.question|safe }}</h5>
                             <div style="padding:3px;">
-                            <a class="btn btn-outline-dark mb-1" href="{% url 'download_essay' essay.id 'q' %}">
+                            <a class="btn btn-outline-dark mb-1" href="{{ essay.working_file.url }}" download>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentcolor"
                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="3" aria-hidden="true"
                                      viewBox="0 0 32 32" focusable="false">

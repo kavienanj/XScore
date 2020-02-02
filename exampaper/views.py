@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseNotFound
 from .models import Exam,  McqQuestion, EssayQuestion, McqOption, ExamPaper, EssayAnswer
-from .forms import ExamUpdateForm, QuestionAddForm
+from .forms import ExamUpdateForm, McqQuestionAddForm, EsyQuestionAddForm
 from datetime import timedelta
 import random
 from .timedexam import TimedExam
@@ -52,36 +52,53 @@ def view_paper(request, id):
 
 
 @login_required
-def add_question(request, id, q_id=None, del_q="false"):
+def remove_question(request, typ, id):
+    if request.user.is_superuser and request.is_ajax():
+        McqQuestion.objects.get(id=id).delete() if typ == "mcq" else EssayQuestion.objects.get(id=id).delete()
+        return HttpResponse("success")
+    else:
+        return redirect('home')
+
+
+@login_required
+def add_question(request, id, typ, q_id=None):
+
+    def clean_save_new_opt(q):
+        for opt in range(1, 5):
+            McqOption.objects.create(
+                question=q,
+                option=request.POST['option_'+str(opt)],
+                is_correct='option_'+str(opt) == request.POST['option_correct'],
+            )
+
+    def clean_save_old_opt(q):
+        for opt in q.get_choices():
+            opt.option = request.POST['op_'+str(opt.id)]
+            opt.is_correct = 'op_'+str(opt.id) == request.POST['option_correct']
+            opt.save()
+    
     if request.user.is_superuser:
         exam = Exam.objects.get(id=id)
-        q = McqQuestion.objects.get(id=q_id) if q_id else None
-        if request.is_ajax() and del_q == "true":
-            q.delete()
-            return HttpResponse("success")
-        ques_form = QuestionAddForm(instance=q)
+        form = McqQuestionAddForm if typ == "mcq" else EsyQuestionAddForm
+        obj = McqQuestion if typ == "mcq" else EssayQuestion
+        q = obj.objects.get(id=q_id) if q_id else None
+        ques_form = form(instance=q)
         if request.method == 'POST':
-            ques_form = QuestionAddForm(request.POST, request.FILES, instance=q)
+            ques_form = form(request.POST, request.FILES, instance=q)
             if ques_form.is_valid():
                 ques_form.exam = exam
                 ques_form.save()
-                if q:
-                    for opt in q.get_choices():
-                        opt.option = request.POST['op_'+str(opt.id)]
-                        opt.is_correct = 'op_'+str(opt.id) == request.POST['option_correct']
-                        opt.save()
+                if q and typ == 'mcq':
+                    clean_save_old_opt(ques_form.instance)
                     return redirect('view_paper', id)
-                for opt in range(1, 5):
-                    McqOption.objects.create(
-                        question=ques_form.instance,
-                        option=request.POST['option_'+str(opt)],
-                        is_correct='option_'+str(opt) == request.POST['option_correct'],
-                    )
-                ques_form = QuestionAddForm()
+                elif typ == 'mcq':
+                    clean_save_new_opt(q)
+                ques_form = form()
         return render(request, 'addquestion.html', {
             'form': ques_form,
             'the_exam': exam,
-            'instance': q if q else False
+            'instance': q if q else False,
+            'typ': typ,
         })
     else:
         return redirect('home')

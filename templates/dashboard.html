@@ -38,7 +38,8 @@
                                     other options</button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                         <a class="dropdown-item" href="{% url 'create_paper' a_exam.id %}"> edit </a>
-                                        <a class="dropdown-item" href="{% url 'add_question' a_exam.id %}"> add Questions </a>
+                                        <a class="dropdown-item" href="{% url 'add_question' a_exam.id 'mcq' %}"> add MCQ Questions </a>
+                                        <a class="dropdown-item" href="{% url 'add_question' a_exam.id 'esy' %}"> add Essay Questions </a>
                                         <a class="dropdown-item" href="{% url 'view_paper' a_exam.id %}"> view Questions </a>
                                     </div>
                             </div>

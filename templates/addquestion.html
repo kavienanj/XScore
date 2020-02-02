@@ -5,14 +5,14 @@
     <!--<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     <script>tinymce.init({selector:'textarea'});</script>-->
     <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
-    <title>Add Questions</title>
+    <title>Add MCQ Questions</title>
 {% endblock %}
 
-{% block upper %}Add Questions{% endblock %}
+{% block upper %}Add MCQ Questions{% endblock %}
 
 
 {% block dipper %}
-<h3 class="card-header">Add Questions</h3>
+<h3 class="card-header">Add MCQ Questions</h3>
 <div class="card-body">
     <p align="left">
         <a href="{% url 'dashboard' %}"> <b><</b> Back to Dashboard</a> &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -24,7 +24,6 @@
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="hidden" name="id_exam" value="{{ the_exam.id }}">
         <input type="hidden" name="exam" value="{{ the_exam.id }}">
         {% for field in form %}{% if field.name != 'exam' %}
                 {% for error in field.errors %}
@@ -35,30 +34,32 @@
         <div class="form-row">{{ field.label_tag }}{{ field }}</div><hr/>
         {% endif %}{% endfor %}
         <script>CKEDITOR.replace('question');</script>
+        
         <div class="form-row" style="display:initial;">
+        {% if typ == 'mcq' %}
             <label for="id_options">Feed the options for the question & click the correct answer,</label>
         <div class="card border-dark shadow-sm" style="margin-bottom:10px;">
             <ul class="list-group list-group-flush" id="id_options">
                 {% if not instance %}
-                {% for i in '1234'|make_list %}
-                <li class="list-group-item" style="padding:2px">
-                    <label name="labels" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
-                        <input type="radio" class="btn-lg" name="option_correct" value="option_{{ i }}" onchange="swap_class(this);" required>
-                        <input type="text" name="option_{{ i }}" class="form-control" maxlength="100" style="margin-left:10px;" required>
-                    </label>
-                </li>
-                {% endfor %}
+                    {% for i in '1234'|make_list %}
+                    <li class="list-group-item" style="padding:2px">
+                        <label name="labels" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
+                            <input type="radio" class="btn-lg" name="option_correct" value="option_{{ i }}" onchange="swap_class(this);" required>
+                            <input type="text" name="option_{{ i }}" class="form-control" maxlength="100" style="margin-left:10px;" required>
+                        </label>
+                    </li>
+                    {% endfor %}
                 {% else %}
-                {% for opt in instance.get_choices %}
-                <li class="list-group-item" style="padding:2px">
-                    <label name="labels" class="d-flex align-items-center border-secondary {% if opt.is_correct %}list-group-item-success{% endif %}" style="padding:12px;margin:0;">
-                        <input type="radio" class="btn-lg" name="option_correct"
-                               value="op_{{ opt.id }}" onchange="swap_class(this);" {% if opt.is_correct %}checked{% endif %} required>
-                        <input type="text" name="op_{{ opt.id }}" class="form-control" value="{{ opt.option }}" maxlength="100" style="margin-left:10px;" required>
-                    </label>
-                </li>
-                {% endfor %}
-                {% endif %}
+                    {% for opt in instance.get_choices %}
+                    <li class="list-group-item" style="padding:2px">
+                        <label name="labels" class="d-flex align-items-center border-secondary {% if opt.is_correct %}list-group-item-success{% endif %}" style="padding:12px;margin:0;">
+                            <input type="radio" class="btn-lg" name="option_correct"
+                                value="op_{{ opt.id }}" onchange="swap_class(this);" {% if opt.is_correct %}checked{% endif %} required>
+                            <input type="text" name="op_{{ opt.id }}" class="form-control" value="{{ opt.option }}" maxlength="100" style="margin-left:10px;" required>
+                        </label>
+                    </li>
+                    {% endfor %}
+                {% endif %}{% endif %}
             </ul>
         </div>
         </div>
